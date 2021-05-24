@@ -4,7 +4,7 @@ Solution for Open DeFi Hackathon bounty: https://gitcoin.co/issue/snxgrants/open
 
 ### Design:
 
-![](./images/landingpage.PNG)
+![](./images/landingpage.png)
 
 ### Guide:
 
