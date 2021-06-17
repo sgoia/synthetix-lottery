@@ -18,6 +18,10 @@ contract("SLottery", ([owner, user1, user2, user3, user4, user5]) => {
   let ticketId3rdPrizeOwner;
   let t1stPrizeOwnerBalanceBeforeClaim;
   let t1stPrizeOwnerBalanceAfterClaim;
+  let t2ndPrizeOwnerBalanceBeforeClaim;
+  let t2ndPrizeOwnerBalanceAfterClaim;
+  let t3rdPrizeOwnerBalanceBeforeClaim;
+  let t3rdPrizeOwnerBalanceAfterClaim;
   console.log("---Owner: ", owner);
 
   before(async () => {
@@ -70,7 +74,7 @@ contract("SLottery", ([owner, user1, user2, user3, user4, user5]) => {
   });
 
   describe("Buy a ticket", () => {
-    it("it reverts if we try to buy less than 1 ticket", async () => {
+    it("Reverts if we try to buy less than 1 ticket", async () => {
       await expectRevert.unspecified(
         lottery.buyTickets(user1, 0, { from: user1 })
       );
@@ -296,25 +300,26 @@ contract("SLottery", ([owner, user1, user2, user3, user4, user5]) => {
         { from: user1 }
       );
 
-      /*
       const random1stPlace = await lottery.lotteryId1stPlaceAward(
         lotteryId.toString(),
-        "9",
+        "2",
         { from: user1 }
       );
       assert.equal(random1stPlace, true);
+
       const random2ndPlace = await lottery.lotteryId2ndPlaceAward(
         lotteryId.toString(),
-        "5",
+        "10",
         { from: user1 }
       );
       assert.equal(random2ndPlace, true);
+
       const random3rdPlace = await lottery.lotteryId3rdPlaceAward(
         lotteryId.toString(),
-        "6",
+        "7",
         { from: user1 }
       );
-      assert.equal(random3rdPlace, true);*/
+      assert.equal(random3rdPlace, true);
     });
 
     it("announce winners success: all 3 prizes must be awarded to participants", async () => {
@@ -476,8 +481,8 @@ contract("SLottery", ([owner, user1, user2, user3, user4, user5]) => {
 
     //it("1st prize winner should have a balance of 95 sUSD", async () => {
     it("1st prize winner sUSD balance snapshot", async () => {
-      t1stPrizeOwnerBalanceBeforeClaim = await sUSD.balanceOf(
-        ticketId1stPrizeOwner
+      t1stPrizeOwnerBalanceBeforeClaim = web3.utils.toBN(
+        await sUSD.balanceOf(ticketId1stPrizeOwner)
       );
       console.log(
         "---sUSD.balanceOf.t1stPrizeOwnerBalanceBeforeClaim: ",
@@ -507,20 +512,23 @@ contract("SLottery", ([owner, user1, user2, user3, user4, user5]) => {
         `Should be the First event type`
       );
       assert.equal(
-        tx.logs[0].args.tokenId,
-        2,
+        tx.logs[0].args.tokenId.toString(),
+        ticketId1stPrize.toString(), //2,
         `Should be the token id ${ticketId1stPrize}`
       );
+      assert.equal(ticketId1stPrize, 2, "Should be the token id 2");
     });
 
-    /*it("1st prize winner should have correct balance after prize claim", async () => {
+    it("1st prize winner should have correct balance after prize claim", async () => {
       // 1st place prize is 50% of 10 tickets at 1 sUSD each = 5 USD
-      t1stPrizeOwnerBalanceAfterClaim = await sUSD.balanceOf(
-        ticketId1stPrizeOwner
+      // 1st prize winner is user2
+      // he bought 1 ticket for 1 sUSD, won 5 sUSD, should have 104 sUSD
+      t1stPrizeOwnerBalanceAfterClaim = web3.utils.toBN(
+        await sUSD.balanceOf(ticketId1stPrizeOwner)
       );
 
-      let prize = Number(tokensToWei("5"));
-      let expectedNewBalance = t1stPrizeOwnerBalanceBeforeClaim + prize;
+      let prize = web3.utils.toBN(tokensToWei("5"));
+      let expectedNewBalance1 = t1stPrizeOwnerBalanceBeforeClaim.add(prize);
       console.log(
         "---sUSD.balanceOf.t1stPrizeOwnerBalanceAfterClaim: ",
         ticketId1stPrizeOwner,
@@ -530,10 +538,17 @@ contract("SLottery", ([owner, user1, user2, user3, user4, user5]) => {
       );
       assert.equal(
         t1stPrizeOwnerBalanceAfterClaim.toString(),
-        expectedNewBalance.toString(),
+        expectedNewBalance1.toString(),
         "The balance of 1st prize ticket id owner should match expected value"
       );
-    });*/
+
+      let expectedBalanceAfterClaim = web3.utils.toBN(tokensToWei("104"));
+      assert.equal(
+        t1stPrizeOwnerBalanceAfterClaim.toString(),
+        expectedBalanceAfterClaim.toString(),
+        "The balance of 1st prize ticket id owner should match expected value"
+      );
+    });
 
     it("should revert if 1st prize winner attempts to claim prize again", async () => {
       //await expectRevert.unspecified(
@@ -617,8 +632,8 @@ contract("SLottery", ([owner, user1, user2, user3, user4, user5]) => {
     });
 
     it("2nd prize winner sUSD balance snapshot", async () => {
-      t2ndPrizeOwnerBalanceBeforeClaim = await sUSD.balanceOf(
-        ticketId2ndPrizeOwner
+      t2ndPrizeOwnerBalanceBeforeClaim = web3.utils.toBN(
+        await sUSD.balanceOf(ticketId2ndPrizeOwner)
       );
       console.log(
         "---sUSD.balanceOf.t2ndPrizeOwnerBalanceBeforeClaim: ",
@@ -648,20 +663,23 @@ contract("SLottery", ([owner, user1, user2, user3, user4, user5]) => {
         `Should be the Second event type`
       );
       assert.equal(
-        tx.logs[0].args.tokenId,
-        10,
+        tx.logs[0].args.tokenId.toString(),
+        ticketId2ndPrize.toString(), //10,
         `Should be the token id ${ticketId2ndPrize}`
       );
+      assert.equal(ticketId2ndPrize, 10, "Should be the token id 10");
     });
 
-    /*it("2nd prize winner should have correct balance after prize claim", async () => {
+    it("2nd prize winner should have correct balance after prize claim", async () => {
       // 2nd place prize is 35% of 10 tickets at 1 sUSD each = 3.5 USD
-      t2ndPrizeOwnerBalanceAfterClaim = await sUSD.balanceOf(
-        ticketId2ndPrizeOwner
+      // 2nd place winner is user5
+      // he bought 1 ticket for 1 sUSD, won 3.5 sUSD, should have 102.5 sUSD
+      t2ndPrizeOwnerBalanceAfterClaim = web3.utils.toBN(
+        await sUSD.balanceOf(ticketId2ndPrizeOwner)
       );
 
-      let prize = Number(tokensToWei("3.5"));
-      let expectedNewBalance = t2ndPrizeOwnerBalanceBeforeClaim + prize;
+      let prize = web3.utils.toBN(tokensToWei("3.5"));
+      let expectedNewBalance = t2ndPrizeOwnerBalanceBeforeClaim.add(prize);
       console.log(
         "---sUSD.balanceOf.t2ndPrizeOwnerBalanceAfterClaim: ",
         ticketId2ndPrizeOwner,
@@ -674,7 +692,14 @@ contract("SLottery", ([owner, user1, user2, user3, user4, user5]) => {
         expectedNewBalance.toString(),
         "The balance of 2nd prize ticket id owner should match expected value"
       );
-    });*/
+
+      let expectedBalanceAfterClaim = web3.utils.toBN(tokensToWei("102.5"));
+      assert.equal(
+        t2ndPrizeOwnerBalanceAfterClaim.toString(),
+        expectedBalanceAfterClaim.toString(),
+        "The balance of 2nd prize ticket id owner should match expected value"
+      );
+    });
 
     it("should revert if 2nd prize winner attempts to claim prize again", async () => {
       //await expectRevert.unspecified(
@@ -758,8 +783,8 @@ contract("SLottery", ([owner, user1, user2, user3, user4, user5]) => {
     });
 
     it("3rd prize winner sUSD balance snapshot", async () => {
-      t3rdPrizeOwnerBalanceBeforeClaim = await sUSD.balanceOf(
-        ticketId3rdPrizeOwner
+      t3rdPrizeOwnerBalanceBeforeClaim = web3.utils.toBN(
+        await sUSD.balanceOf(ticketId3rdPrizeOwner)
       );
       console.log(
         "---sUSD.balanceOf.t3rdPrizeOwnerBalanceBeforeClaim: ",
@@ -789,20 +814,23 @@ contract("SLottery", ([owner, user1, user2, user3, user4, user5]) => {
         `Should be the Third event type`
       );
       assert.equal(
-        tx.logs[0].args.tokenId,
-        7,
+        tx.logs[0].args.tokenId.toString(),
+        ticketId3rdPrize.toString(),
         `Should be the token id ${ticketId3rdPrize}`
       );
+      assert.equal(ticketId3rdPrize, 7, "Should be the token id 7");
     });
 
-    /*it("3rd prize winner should have correct balance after prize claim", async () => {
+    it("3rd prize winner should have correct balance after prize claim", async () => {
       // 3rd place prize is 15% of 10 tickets at 1 sUSD each = 1.5 USD
-      t3rdPrizeOwnerBalanceAfterClaim = await sUSD.balanceOf(
-        ticketId3rdPrizeOwner
+      // 3rd prize winner is user4
+      // he bought 4 tickets for 4 sUSD, won 1.5 sUSD, should have 97.5 sUSD
+      t3rdPrizeOwnerBalanceAfterClaim = web3.utils.toBN(
+        await sUSD.balanceOf(ticketId3rdPrizeOwner)
       );
 
-      let prize = Number(tokensToWei("1.5"));
-      let expectedNewBalance = t3rdPrizeOwnerBalanceBeforeClaim + prize;
+      let prize = web3.utils.toBN(tokensToWei("1.5"));
+      let expectedNewBalance = t3rdPrizeOwnerBalanceBeforeClaim.add(prize);
       console.log(
         "---sUSD.balanceOf.t3rdPrizeOwnerBalanceAfterClaim: ",
         ticketId3rdPrizeOwner,
@@ -815,7 +843,14 @@ contract("SLottery", ([owner, user1, user2, user3, user4, user5]) => {
         expectedNewBalance.toString(),
         "The balance of 3rd prize ticket id owner should match expected value"
       );
-    });*/
+
+      let expectedBalanceAfterClaim = web3.utils.toBN(tokensToWei("97.5"));
+      assert.equal(
+        t3rdPrizeOwnerBalanceAfterClaim.toString(),
+        expectedBalanceAfterClaim.toString(),
+        "The balance of 3rd prize ticket id owner should match expected value"
+      );
+    });
 
     it("should revert if 3rd prize winner attempts to claim prize again", async () => {
       //await expectRevert.unspecified(
